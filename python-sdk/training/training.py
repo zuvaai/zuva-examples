@@ -83,7 +83,7 @@ training_examples = []
 with open ('training_examples.csv') as csvfile:
     inputreader = csv.reader(csvfile, dialect="excel")
     for row in inputreader:
-        training_examples.append({"file_name": row[0], "annotations": row[1]})
+        training_examples.append({"file_name": row[0], "annotation": row[1]})
 
 
 # 
@@ -108,7 +108,7 @@ for example in training_examples:
 
 # ### OCR your documents
 # 
-# Prior to training your fields, you will process them using the [DocAI OCR service](http://localhost:1313/documentation/services/using-ocr/).
+# Prior to training your fields, you must process them using the [DocAI OCR service](http://localhost:1313/documentation/services/using-ocr/).
 # 
 # Start by creating an OCR request for each file:
 
@@ -156,13 +156,13 @@ annotations_dict = {}
 for example in training_examples:
     file_id = example['file_id']
     
-    if example['annotations'] == "":
-        print(example['file_name'], "no annotations")
+    if example['annotation'] == "":
+        print(example['file_name'], "no annotation")
         annotations_dict[file_id] = []
         continue
     text = example['ocr_request'].get_text()
 
-    matches = fuzzysearch.find_near_matches(example['annotations'], text, max_l_dist=L_DIST)
+    matches = fuzzysearch.find_near_matches(example['annotation'], text, max_l_dist=L_DIST)
     start = matches[0].start
     end = matches[0].end
         
@@ -179,6 +179,31 @@ for file_id, locations in annotations_dict.items():
     annotations.append({'file_id': file_id, 'locations': locations})
 
 
+# The output should look like:
+#     1. ENERGIZERH-1012BARegi-5112015.PDF 26952 27310
+#     2. JENNYCRAIG_EX10MaterialContracts_19991115.pdf 55089 55719
+#     3. ARLINGTONA_EX10MaterialContracts_20090520.pdf 20652 20995
+#     4. ISTARACQUI-S1ASecurit-12262007.PDF 10715 11058
+#     5. DIEDRICHCO_EX10MaterialContracts_20050216.pdf 11710 11911
+#     6. MADISONTEC_EX10MaterialContracts_20160919.pdf 34476 34777
+#     7. GLASSHOUSE_EX10MaterialContracts_20100408.pdf 74754 74904
+#     8. ALTEGRISKK_EX99AdditionalExhibits_20150422.pdf 17361 17704
+#     9. VISHAYPREC_EX10MaterialContracts_20100326.pdf 18666 19049
+#     10. NATURADEIN-8KUnschedu-892005.PDF 12613 12781
+#     11. VEQUITYCOR-SB2AObsole-4302001.pdf 8090 8293
+#     12. ISCON_EX104MaterialContracts_20000501.pdf no annotation
+#     13. EXELISINCO_EX10MaterialContracts_20110914.pdf 23987 24029
+#     14. SUNNYLIFE-10SB12GSec-9142006.pdf 10460 10662
+#     15. SPARGROUPI_EX10MaterialContracts_20030331.pdf no annotation
+#     16. ZJMCAPLLC-S4Securiti-9202007.PDF 21461 21674
+#     17. SEAWORLDEN_EX10MaterialContracts_20121227.pdf 55656 55996
+#     18. KKRFINANCI-S11ASecuri-6212005.PDF 12085 12428
+#     19. XYLEMINCOR_EX10MaterialContracts_20110926.pdf 37744 37987
+#     20. TDAMERITRA_EX99AdditionalExhibits_20050912 (2).pdf 34957 35236
+#     21. XOMACORPOR-10KAnnualR-392016 (2).PDF 13292 13513
+# 
+# Note that there are two files with no annotations. In one case (`12. ISCON_EX104MaterialContracts_20000501.pdf`), we've deliberately included a file with no "Further Assurances" clauses, which the ML will use as a negative example. The other case (`15. SPARGROUPI_EX10MaterialContracts_20030331.pdf`) is also deliberate included as a demonstration of what it looks like when the AI finds a "false positive" during training. There is also one file (`13. EXELISINCO_EX10MaterialContracts_20110914.pdf`) where we've erroneously provided a "Survival" clause instead, as an example of a false negative.
+# 
 # The `annotations` object now contains all of the information DocAI will need in order to train a field.
 
 # ### Create and train the field
@@ -214,22 +239,41 @@ accuracy, _ = sdk.fields.get_accuracy(field_id=field_id)
 print(f"Precision: {accuracy.precision}")
 print(f"Recall: {accuracy.recall}")
 print(f"F-score: {accuracy.f_score}")
-print(f"Examples: {accuracy.example_count}")
+print(f"Example count: {accuracy.example_count}")
 
 
+# The scores should look like:
+# 
+#     Precision: 0.7272727272727273
+#     Recall: 0.8888888888888888
+#     F-score: 0.7999999999999999
+#     Examples: 21
+# 
 # Let's break down what exactly these scores mean.
 # 
 # #### Precision
 # 
-# The precision of a model measures its ability to return only the target extractions. It is defined as `P = (True Positives) / (True Positives + False Positives)`  - i.e. the proportion of results which are correct. Higher is better, with an ideal score of 1.
+# The precision of a model measures its ability to return only the target extractions. It is defined as
+# 
+#     P = (True Positives) / (True Positives + False Positives)
+# 
+# i.e. the proportion of results which are correct. Higher is better, with an ideal score of 1.
 # 
 # ### Recall
 # 
-# The recall of a model measures its ability to return all target extractions. It is defined as `R = (True Positives) / (True Positives + False Negatives)` = i.e. the proportion of target extractions which were actually found. Higher is better, with an ideal score of 1.
+# The recall of a model measures its ability to return all target extractions. It is defined as
+# 
+#     R = (True Positives) / (True Positives + False Negatives)
+# 
+# i.e. the proportion of target extractions which were actually found. Higher is better, with an ideal score of 1.
 # 
 # ### F-Score
 # 
-# Neither of the two measures above present a complete measure of model performance. A model with excellent precision may omit many valid results, while a model with excellent recall may include a large number of false negatives. The F-score is a standard metric for overall model performance taking into account both precision and accuracy, defined as `F = 2 * (P * R) / (P + R)`. Higher is better, with an ideal score of 1.
+# Neither of the two measures above present a complete measure of model performance. A model with excellent precision may omit many valid results, while a model with excellent recall may include a large number of false negatives. The F-score is a standard metric for overall model performance taking into account both precision and accuracy, defined as
+# 
+#     F = 2 * (P * R) / (P + R)
+# 
+# Higher is better, with an ideal score of 1.
 # 
 # ### Example count
 # 
@@ -261,28 +305,31 @@ for vd in validation_details:
 
 # Which should give output like the following:
 # 
-#     cf6345k2nt5g1d87cklg fn 26952 27310
-#     cf6345k2nt5g1d87ckng fn 55089 55719
-#     cf6345s2nt5g1d87ckpg fn 20640 20983
-#     cf6345s2nt5g1d87ckrg fn 10715 11058
-#     cf6346c2nt5g1d87cktg fn 11710 11911
-#     cf6347s2nt5g1d87cl00 fn 34476 34777
-#     cf6347s2nt5g1d87cl20 fn 74754 74904
-#     cf634842nt5g1d87cl40 fn 17342 17685
-#     cf634842nt5g1d87cl60 fn 18666 19049
-#     cf634842nt5g1d87cl80 fn 12613 12781
-#     cf6348c2nt5g1d87cla0 tp 8090 8293
-#     cf6348s2nt5g1d87cle0 tp 30551 30799
-#     cf634942nt5g1d87clhg tp 10460 10662
-#     cf634942nt5g1d87cljg tp 27436 27455
-#     cf634942nt5g1d87cllg tp 21460 21673
-#     cf6349c2nt5g1d87clo0 tp 55652 55996
-#     cf6349c2nt5g1d87clq0 tp 12085 12428
-#     cf6349k2nt5g1d87cls0 tp 37731 37979
-#     cf6349k2nt5g1d87clu0 tp 34957 35236
-#     cf6349k2nt5g1d87cm00 tp 13292 13513
+#     cf83h8k2nt5g1d8c73u0 fn 26952 27310
+#     cf83h8s2nt5g1d8c7400 fn 55089 55719
+#     cf83h8s2nt5g1d8c7420 fn 20652 20995
+#     cf83h942nt5g1d8c7440 fn 10715 11058
+#     cf83h9k2nt5g1d8c7460 fn 11710 11911
+#     cf83hac2nt5g1d8c748g fn 34476 34777
+#     cf83hac2nt5g1d8c74ag fn 74754 74904
+#     cf83hak2nt5g1d8c74cg fn 17361 17704
+#     cf83hak2nt5g1d8c74eg fn 18666 19049
+#     cf83has2nt5g1d8c74gg fn 12613 12781
+#     cf83hb42nt5g1d8c74ig tp 8090 8293
+#     cf83hbc2nt5g1d8c74mg fp 30551 30799
+#     cf83hbc2nt5g1d8c74mg fn 23987 24029
+#     cf83hbk2nt5g1d8c74og tp 10476 10662
+#     cf83hbk2nt5g1d8c74qg fp 27436 27899
+#     cf83hbs2nt5g1d8c74sg tp 21461 21674
+#     cf83hbs2nt5g1d8c74ug tp 55652 55996
+#     cf83hbs2nt5g1d8c74ug fp 42625 42872
+#     cf83hc42nt5g1d8c750g tp 12085 12428
+#     cf83hc42nt5g1d8c752g tp 37739 37987
+#     cf83hc42nt5g1d8c754g tp 34957 35236
+#     cf83hcc2nt5g1d8c7570 tp 13292 13513
 # 
-# Note that the first ten entries always appear as "False negatives", since they are used to train the initial model and are never used for validation. From the eleventh onwards, we should start to see a mix of the following:
+# Note that the first ten entries always appear as false negatives (`fn`), since they are used to train the initial model and are never used for validation. From the eleventh onwards, we should start to see a mix of `tp`, `tn` and `fn`. 
+# 
 # 
 # ### TP (true positive)
 # 
