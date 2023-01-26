@@ -113,7 +113,7 @@ The above will go through the list of training files and upload each to DocAI, s
 
 ### OCR your documents
 
-Prior to training your fields, you must process them using the [DocAI OCR service](http://localhost:1313/documentation/services/using-ocr/).
+Prior to training your fields, you must process them using the [DocAI OCR service](https://zuva.ai/documentation/services/using-ocr/).
 
 Start by creating an OCR request for each file:
 
@@ -152,9 +152,9 @@ To train a model, DocAI needs to know the location of the target text to be extr
 
 These locations must be given in terms of Zuva's internal representation of the document, which can be obtained from the OCR text, layouts or eOCR.
 
-For example, if you are building your own document viewer, you would retrieve the documents layouts (see the [layouts tutorial](https://zuva.ai/documentation/tutorials/using-layouts/)) and images, and use them in a viewer such as [specatator](https://github.com/zuvaai/spectator).
+For example, if you are building your own document viewer, you would retrieve the documents layouts (see the [layouts tutorial](https://zuva.ai/documentation/tutorials/using-layouts/)) and images, and use them in a viewer such as [spectator](https://github.com/zuvaai/spectator).
 
-In our case, we have already loaded the highlight text from the `training_examples.csv` file, so we just have to figure out where those text strings are located within Zuva's OCRed version of the document. Since there may be small discrepencies between our search string and Zuva's OCRed version of the document, we'll use a fuzzy search to find the string within the OCR text. 
+In our case, we have already loaded the highlight text from the `training_examples.csv` file, so we just have to figure out where those text strings are located within Zuva's OCRed version of the document. Since there may be small discrepancies between our search string and Zuva's OCRed version of the document, we'll use a fuzzy search to find the string within the OCR text. 
 
 
 ```python
