@@ -4,13 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --project ./",
-    "start": "nodemon src/server.ts"
+    "serve": "nodemon src/server.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
@@ -21,7 +21,6 @@
     "eslint": "^8.33.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "http-proxy-middleware": "^2.0.6",
     "nodemon": "^2.0.21",
     "prettier": "^2.8.3",
     "ts-node": "^10.9.1",
