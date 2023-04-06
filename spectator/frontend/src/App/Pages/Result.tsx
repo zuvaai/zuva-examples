@@ -6,7 +6,7 @@ import { BoundingBox, Results, Token } from "../../types";
 import fields from "../../fields.json";
 import { Character, CharacterRange } from "../utils/recognitionResults";
 
-import DocumentViewer from "../../../../../spectator/packages/document-viewer/src/Viewer";
+import DocumentViewer from "@zuvaai/document-viewer";
 
 type ResultProps = {
   file: File;
