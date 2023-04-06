@@ -50,7 +50,7 @@ const generateTokens = (
           (lastToken ? determineLine(lastToken, boundingBox) : 0);
 
         tokens[tokens.length - 1] = {
-          characterStart: start + (token?.characterStart || i),
+          characterStart: token?.characterStart || start + i,
           characterEnd: start + i,
           line,
           boundingBox,
@@ -68,7 +68,7 @@ const Result = ({ file, results, onReset }: ResultProps): JSX.Element => {
         fields.find((field) => field.field_id == result.field_id)?.field_name ||
         "";
 
-      return result.extractions.map((extraction) =>
+      return result.extractions.map((extraction, i) =>
         (extraction.spans || []).map((span) => ({
           characterStart: span.start,
           characterEnd: span.end,
@@ -76,7 +76,7 @@ const Result = ({ file, results, onReset }: ResultProps): JSX.Element => {
           pageEnd: span.pages.end,
           top: span.bounds.top,
           left: span.bounds.left,
-          topic: topic,
+          topic,
         }))
       );
     })
