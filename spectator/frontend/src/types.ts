@@ -31,7 +31,7 @@ type DefinedTerm = {
 type Extraction = {
   spans?: Span[];
   text: string;
-  defined_term: DefinedTerm;
+  defined_term?: DefinedTerm;
 };
 
 type ExtractionResult = {
