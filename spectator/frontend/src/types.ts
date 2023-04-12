@@ -7,14 +7,12 @@ export type BoundingBox = {
   top: number;
 };
 
-type BBox = {
-  page: number;
-  bounds: BoundingBox[];
-};
-
 type Span = {
   bounds: BoundingBox;
-  bboxes: BBox[];
+  bboxes: {
+    page: number;
+    bounds: BoundingBox[];
+  }[];
   end: number;
   pages: {
     end: number;
@@ -23,26 +21,20 @@ type Span = {
   start: number;
 };
 
-type DefinedTerm = {
-  term: string;
-  spans: Span[];
-};
-
-type Extraction = {
-  spans?: Span[];
-  text: string;
-  defined_term?: DefinedTerm;
-};
-
-type ExtractionResult = {
-  extractions: Extraction[];
-  field_id: string;
-};
-
 export type ExtractionResults = {
   file_id: string;
   request_id: string;
-  results: ExtractionResult[];
+  results: {
+    extractions: {
+      spans?: Span[];
+      text: string;
+      defined_term?: {
+        term: string;
+        spans: Span[];
+      };
+    }[];
+    field_id: string;
+  }[];
 };
 
 export type Results = {
