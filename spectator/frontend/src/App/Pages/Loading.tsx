@@ -82,8 +82,7 @@ const Loading = ({ file, onReset, setResults }: LoadingProps): JSX.Element => {
       }
     };
 
-    const processRequest = async (path: string, body: string) => {
-      const url = `${BASE_URL}/${path}`;
+    const processRequest = async (url: string, body: string) => {
       const postResp = await fetch(url, {
         method: "POST",
         headers,
@@ -101,7 +100,7 @@ const Loading = ({ file, onReset, setResults }: LoadingProps): JSX.Element => {
       setExtractionLoading(true);
 
       const requestId = await processRequest(
-        "extraction",
+        `${BASE_URL}/extraction`,
         JSON.stringify({ file_ids: [fileId], field_ids: FIELD_IDS })
       );
 
@@ -119,7 +118,7 @@ const Loading = ({ file, onReset, setResults }: LoadingProps): JSX.Element => {
       setOcrLoading(true);
 
       const requestId = await processRequest(
-        "ocr",
+        `${BASE_URL}/ocr`,
         JSON.stringify({ file_ids: [fileId] })
       );
 
