@@ -8,7 +8,7 @@ import { Character, CharacterRange } from "../utils/recognitionResults";
 
 import DocumentViewer from "@zuvaai/document-viewer";
 
-type ResultProps = {
+type ViewerProps = {
   file: File;
   results: Results;
   onReset: () => void;
@@ -61,7 +61,7 @@ const generateTokens = (
     }, [])
     .filter((item): item is Token => !!item);
 
-const Result = ({ file, results, onReset }: ResultProps): JSX.Element => {
+const Viewer = ({ file, results, onReset }: ViewerProps): JSX.Element => {
   const annotations = results.resultsText.results
     .map((result) => {
       const topic =
@@ -119,4 +119,4 @@ const Result = ({ file, results, onReset }: ResultProps): JSX.Element => {
   );
 };
 
-export default Result;
+export default Viewer;

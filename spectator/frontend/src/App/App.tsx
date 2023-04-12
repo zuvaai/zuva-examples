@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import Loading from "./Pages/Loading";
 import Upload from "./Pages/Upload";
-import Result from "./Pages/Result";
+import Viewer from "./Pages/Viewer";
 
 import { Results } from "../types";
 
@@ -16,7 +16,7 @@ const App = (): JSX.Element => {
   };
 
   return results && file ? (
-    <Result file={file} results={results} onReset={onReset} />
+    <Viewer file={file} results={results} onReset={onReset} />
   ) : file ? (
     <Loading file={file} onReset={onReset} setResults={setResults} />
   ) : (
