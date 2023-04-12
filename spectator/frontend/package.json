@@ -2,7 +2,6 @@
   "name": "docai-spectator",
   "version": "0.0.1",
   "scripts": {
-    "lint": "eslint --ext .js,jsx --ignore-path ../.gitignore .",
     "dev": "vite",
     "build": "vite build"
   },
