@@ -21,7 +21,7 @@ const Loading = ({ file, onReset, setResults }: LoadingProps): JSX.Element => {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [extractionLoading, setExtractionLoading] = useState(false);
 
-  const [fileId, setFileId] = useState("");
+  const [fileId, setFileId] = useState<string>();
   const [resultsText, setResultsText] = useState();
   const [imageBaseUrl, setImageBaseUrl] = useState<string>();
   const [layouts, setLayouts] = useState<Document>();
