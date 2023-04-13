@@ -17,7 +17,7 @@ type ViewerProps = {
 const mergeBoundingBoxes = (
   token: Token | undefined,
   { boundingBox: { x1, y1, x2, y2 } }: Character
-) => ({
+): BoundingBox => ({
   top: Math.min(token?.boundingBox.top || y1, y1),
   left: Math.min(token?.boundingBox.left || x1, x1),
   bottom: Math.max(token?.boundingBox.bottom || y2, y2),
@@ -45,9 +45,7 @@ const generateTokens = (
         if (token != undefined) tokens.push(undefined);
       } else {
         const lastToken = tokens[tokens.length - 2];
-        const line =
-          token?.line ??
-          (lastToken ? determineLine(lastToken, boundingBox) : 0);
+        const line = lastToken ? determineLine(lastToken, boundingBox) : 0;
 
         tokens[tokens.length - 1] = {
           characterStart: token?.characterStart || start + i,
@@ -68,7 +66,7 @@ const Viewer = ({ file, results, onReset }: ViewerProps): JSX.Element => {
         fields.find((field) => field.field_id == result.field_id)?.field_name ||
         "";
 
-      return result.extractions.map((extraction, i) =>
+      return result.extractions.map((extraction) =>
         (extraction.spans || []).map((span) => ({
           characterStart: span.start,
           characterEnd: span.end,
@@ -89,10 +87,7 @@ const Viewer = ({ file, results, onReset }: ViewerProps): JSX.Element => {
   const pages = results.layouts.pages.map((page, index) => ({
     originalHeight: page.height,
     originalWidth: page.width,
-    imageURL: () =>
-      fetch(`${results.imageBaseUrl}/${index + 1}`)
-        .then((res) => res.blob())
-        .then((blob) => URL.createObjectURL(blob)),
+    imageURL: `${results.imageBaseUrl}/${index + 1}`,
     tokensURL: () =>
       new Promise<Token[]>((resolve) =>
         resolve(generateTokens(results.layouts.characters, page.range))
