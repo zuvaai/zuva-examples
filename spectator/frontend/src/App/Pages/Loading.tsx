@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Check, Refresh } from "@mui/icons-material";
 
-import { Results } from "../../types";
+import { ExtractionResults } from "../../types";
 import fields from "../../fields.json";
 import { Document } from "../utils/recognitionResults";
 
@@ -13,18 +13,23 @@ const FIELD_IDS = fields.map((f) => f.field_id);
 type LoadingProps = {
   file: File;
   onReset: () => void;
-  setResults: (results: Results) => void;
+  setResultsText: (resultsText: ExtractionResults) => void;
+  setImageBaseUrl: (imageBaseUrl: string) => void;
+  setLayouts: (layouts: Document) => void;
 };
 
-const Loading = ({ file, onReset, setResults }: LoadingProps): JSX.Element => {
+const Loading = ({
+  file,
+  onReset,
+  setResultsText,
+  setImageBaseUrl,
+  setLayouts,
+}: LoadingProps): JSX.Element => {
   const [filesLoading, setFilesLoading] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [extractionLoading, setExtractionLoading] = useState(false);
 
   const [fileId, setFileId] = useState<string>();
-  const [resultsText, setResultsText] = useState();
-  const [imageBaseUrl, setImageBaseUrl] = useState<string>();
-  const [layouts, setLayouts] = useState<Document>();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -142,16 +147,6 @@ const Loading = ({ file, onReset, setResults }: LoadingProps): JSX.Element => {
       controller.abort();
     };
   }, [fileId]);
-
-  useEffect(() => {
-    if (!resultsText || !imageBaseUrl || !layouts) return;
-
-    setResults({
-      resultsText,
-      imageBaseUrl,
-      layouts,
-    });
-  }, [resultsText, imageBaseUrl, layouts]);
 
   return (
     <Box

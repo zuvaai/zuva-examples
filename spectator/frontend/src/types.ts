@@ -37,12 +37,6 @@ export type ExtractionResults = {
   }[];
 };
 
-export type Results = {
-  resultsText: ExtractionResults;
-  imageBaseUrl: string;
-  layouts: Document;
-};
-
 export type Token = {
   line: number;
   boundingBox: BoundingBox;

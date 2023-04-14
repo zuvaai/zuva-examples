@@ -2,15 +2,21 @@ import React from "react";
 
 import { Box } from "@mui/material";
 
-import { BoundingBox, Results, Token } from "../../types";
+import { BoundingBox, ExtractionResults, Token } from "../../types";
 import fields from "../../fields.json";
-import { Character, CharacterRange } from "../utils/recognitionResults";
+import {
+  Character,
+  CharacterRange,
+  Document,
+} from "../utils/recognitionResults";
 
 import DocumentViewer from "@zuvaai/document-viewer";
 
 type ViewerProps = {
   file: File;
-  results: Results;
+  resultsText: ExtractionResults;
+  imageBaseUrl: string;
+  layouts: Document;
   onReset: () => void;
 };
 
@@ -59,8 +65,14 @@ const generateTokens = (
     }, [])
     .filter((item): item is Token => !!item);
 
-const Viewer = ({ file, results, onReset }: ViewerProps): JSX.Element => {
-  const annotations = results.resultsText.results
+const Viewer = ({
+  file,
+  resultsText,
+  imageBaseUrl,
+  layouts,
+  onReset,
+}: ViewerProps): JSX.Element => {
+  const annotations = resultsText.results
     .map((result) => {
       const topic =
         fields.find((field) => field.field_id == result.field_id)?.field_name ||
@@ -84,13 +96,13 @@ const Viewer = ({ file, results, onReset }: ViewerProps): JSX.Element => {
 
   const topics = fields.map((field) => field.field_name);
 
-  const pages = results.layouts.pages.map((page, index) => ({
+  const pages = layouts.pages.map((page, index) => ({
     originalHeight: page.height,
     originalWidth: page.width,
-    imageURL: `${results.imageBaseUrl}/${index + 1}`,
+    imageURL: `${imageBaseUrl}/${index + 1}`,
     tokensURL: () =>
       new Promise<Token[]>((resolve) =>
-        resolve(generateTokens(results.layouts.characters, page.range))
+        resolve(generateTokens(layouts.characters, page.range))
       ),
   }));
 
