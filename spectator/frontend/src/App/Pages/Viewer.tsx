@@ -2,8 +2,8 @@ import React from "react";
 
 import { Box } from "@mui/material";
 
-import { BoundingBox, ExtractionResults, Token } from "../../types";
 import fields from "../../fields.json";
+import { BoundingBox, ExtractionResults, Token } from "../../types";
 import {
   Character,
   CharacterRange,

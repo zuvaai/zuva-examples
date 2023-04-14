@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Check, Refresh } from "@mui/icons-material";
 
-import { ExtractionResults } from "../../types";
 import fields from "../../fields.json";
+import { ExtractionResults } from "../../types";
 import { Document } from "../utils/recognitionResults";
 
 const BASE_URL = "http://localhost:3001";
