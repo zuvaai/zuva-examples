@@ -8,7 +8,6 @@ import fields from "../../fields.json";
 import { Document } from "../utils/recognitionResults";
 
 const BASE_URL = "http://localhost:3001";
-const FIELD_IDS = fields.map((f) => f.field_id);
 
 type LoadingProps = {
   file: File;
@@ -106,7 +105,10 @@ const Loading = ({
 
       const requestId = await processRequest(
         `${BASE_URL}/extraction`,
-        JSON.stringify({ file_ids: [fileId], field_ids: FIELD_IDS })
+        JSON.stringify({
+          file_ids: [fileId],
+          field_ids: fields.map((f) => f.field_id),
+        })
       );
 
       const resultsTextResponse = await fetch(
