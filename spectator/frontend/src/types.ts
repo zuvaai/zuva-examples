@@ -1,5 +1,3 @@
-import { Document } from "./App/utils/recognitionResults";
-
 export type BoundingBox = {
   bottom: number;
   left: number;
