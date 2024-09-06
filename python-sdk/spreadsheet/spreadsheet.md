@@ -1,18 +1,18 @@
 ## Introduction
 
-This document contains a step-by-step tutorial on how to leverage DocAI to obtain key metadata from your documents, as well as how this metadata can be saved to a spreadsheet for ease-of-reading.
+This document contains a step-by-step tutorial on how to leverage Zuva to obtain key metadata from your documents, as well as how this metadata can be saved to a spreadsheet for ease-of-reading.
 
-After you have gone through this tutorial, you will be left with a working Python script that leverages multiple packages to take documents from your local folder, use machine learning (via DocAI) to extract and classify key metadata and save the content in a spreadsheet. Best of all, you will be able to explain what each component of the script does!
+After you have gone through this tutorial, you will be left with a working Python script that leverages multiple packages to take documents from your local folder, use machine learning (via Zuva) to extract and classify key metadata and save the content in a spreadsheet. Best of all, you will be able to explain what each component of the script does!
 
 ## What will you learn?
 
 The following is what you will learn by going through this tutorial:
 
-- How to create an instance of the Python SDK to interact with DocAI
-- How to submit your documents to DocAI
+- How to create an instance of the Python SDK to interact with Zuva
+- How to submit your documents to Zuva
 - How to create Language, Classification, and Field Extraction requests
-- How to select fields from DocAI’s readily-available out-of-the-box fields
-- How to output the data DocAI provides into an easy-to-read spreadsheet
+- How to select fields from Zuva’s readily-available out-of-the-box fields
+- How to output the data Zuva provides into an easy-to-read spreadsheet
 
 ## Requirements
 
@@ -20,7 +20,7 @@ To go through this tutorial, you will need:
 
 - The Python interpreter (this tutorial uses v3.10)
 - A Zuva account and token - see the [Getting started guide](https://zuva.ai/documentation/quickstart/)
-- A copy of Zuva’s [DocAI Python SDK](https://github.com/zuvaai/zdai-python)
+- A copy of Zuva’s [Python SDK](https://github.com/zuvaai/zdai-python)
 
 ## Let’s Build!
 
@@ -30,12 +30,12 @@ The first step is to import the necessary Python packages in your script. Below 
 
 
 ```python
-# 'pandas' is used to take what we have obtained from DocAI
+# 'pandas' is used to take what we have obtained from Zuva
 # and save it in a format that we want in a spreadsheet
 import pandas as pd
 
 # 'time' is used to wait a couple seconds between our checks
-# to DocAI to see if the request has completed
+# to Zuva to see if the request has completed
 import time
 
 # 'os' is used to get the files that exist in our file uploads
@@ -43,10 +43,8 @@ import time
 # and also determine if the path provided is a file (or not).
 import os
 
-# 'zdai' is the Zuva DocAI Python SDK, which provides functions
-# which make it easier to use DocAI via Python.
-# We are importing ZDAISDK (Zuva DocAI Software Development Kit)
-# which is the entry point to DocAI's services.
+# 'zdai' is the Zuva Python SDK, which provides functions
+# which make it easier to use Zuva via Python.
 # The other packages are the request types that we are going to
 # create as part of this tutorial.
 from zdai import ZDAISDK, DocumentClassificationRequest, \
@@ -55,7 +53,7 @@ from zdai import ZDAISDK, DocumentClassificationRequest, \
 
 ### Get the files
 
-Before you can run DocAI’s ML on your document, you will need to submit it (or them) to DocAI first. Below is how you can provide a folder name (upload_files, in this case) pointing to a folder that contains documents.
+Before you can run Zuva’s ML on your document, you will need to submit it (or them) to Zuva first. Below is how you can provide a folder name (upload_files, in this case) pointing to a folder that contains documents.
 
 
 ```python
@@ -73,21 +71,21 @@ To verify the contents of docs, you can run `print([d for d in docs])`. While th
 
 ## Create an instance of the SDK
 
-At this point in the tutorial you have imported the necessary Python packages, as well as loaded the documents that will be sent to DocAI. You should also have a token that was created, as mentioned in the requirements.
+At this point in the tutorial you have imported the necessary Python packages, as well as loaded the documents that will be sent to Zuva. You should also have a token that was created, as mentioned in the requirements.
 
 
 ```python
 sdk = ZDAISDK(url   = 'https://us.app.zuva.ai/api/v2',
-              token = os.getenv('DOCAI_TOKEN'))
+              token = os.getenv('ZUVA_TOKEN'))
 ```
 
-DocAI offers multiple regions to choose from, which can help you decrease latency (due to being physically closer/in the region), and data residency requirements. If you created a token on another region, provide that region’s url (e.g. japan.app.zuva.ai, eu.app.zuva.ai) instead of the one provided above (us.app.zuva.ai).
+Zuva's API servers are hosted in both the US and Europe regions, which can help you decrease latency (due to being physically closer/in the region), and data residency requirements. If you created a token on another region, provide that region’s url (e.g. eu.app.zuva.ai) instead of the one provided above (us.app.zuva.ai).
 
-Going forward, the `sdk` variable is going to be used to interact with DocAI.
+Going forward, the `sdk` variable is going to be used to interact with Zuva.
 
-### Get the DocAI Fields
+### Get the Zuva Fields
 
-All DocAI users can utilize the Zuva-maintained AI model catalog in their workflow. These AI models are known as Fields in DocAI: they are used to extract entities, provisions and clauses from legal documents. DocAI is able to extract text written in a non-standard way (i.e. non-templated), which results in an offering that searches based on the AI’s understanding of legal concepts, as opposed to traditional regular expressions and database searches.
+All Zuva users can utilize the Zuva-maintained AI model catalog in their workflow. These AI models are known as Fields in Zuva: they are used to extract entities, provisions and clauses from legal documents. Zuva is able to extract text written in a non-standard way (i.e. non-templated), which results in an offering that searches based on the AI’s understanding of legal concepts, as opposed to traditional regular expressions and database searches.
 
 
 ```python
@@ -98,32 +96,32 @@ print(f'Found {len(fields)} fields on region {sdk.url}')
 The `fields` variable contains a reference to all of the Fields available to you. When run, the above will print how many fields were found on the region that you used when creating an instance of the Python SDK.
 
 
-### Submit your documents to DocAI
+### Submit your documents to Zuva
 
-Submitting documents to DocAI is the first step towards obtaining metadata out of the document. Note that DocAI will not use the documents submitted to it for training purposes. These submitted documents are treated as confidential and are not used by Zuva for anything.
+Submitting documents to Zuva is the first step towards obtaining metadata out of the document. Note that Zuva will not use the documents submitted to it for training purposes. These submitted documents are treated as confidential and are not used by Zuva for anything.
 
-You can submit your documents to DocAI for analysis by running the following:
+You can submit your documents to Zuva for analysis by running the following:
 
 
 ```python
-docai_files = []
+zuva_files = []
 
 for doc in docs:
     with open(doc, 'rb') as f:
         file, _ = sdk.file.create(content=f.read())
         file.name = os.path.basename(doc)
-        docai_files.append(file)
-        print(f'Submitted "{file.name}" to DocAI. '
-              f'DocAI sees this file as "{file.id}", and will be deleted on {file.expiration}.')
+        zuva_files.append(file)
+        print(f'Submitted "{file.name}" to Zuva. '
+              f'Zuva sees this file as "{file.id}", and will be deleted on {file.expiration}.')
 ```
 
-The above will go through all of your documents (from your docs variable) and submit the document to DocAI. This is done by using a function that the sdk exposes: `file.create`, which takes the file content (in this case, `f.read()`). The DocAI response is assigned to a variable named `file`, which contains properties that can be used by you to keep track of this document.
+The above will go through all of your documents (from your docs variable) and submit the document to Zuva. This is done by using a function that the sdk exposes: `file.create`, which takes the file content (in this case, `f.read()`). The Zuva response is assigned to a variable named `file`, which contains properties that can be used by you to keep track of this document.
 
 The three properties used above are: `file.name` (set locally to make it easier to keep track), `file.id` (the file’s unique identifier) and `file.expiration` (when it will be deleted).
 
-These files are loaded in `docai_files`, which will be used in the next steps to create requests in DocAI.
+These files are loaded in `zuva_files`, which will be used in the next steps to create requests in Zuva.
 
-### Create requests in DocAI
+### Create requests in Zuva
 
 All requests in this script will be added to a variable named `requests`:
 
@@ -132,7 +130,7 @@ All requests in this script will be added to a variable named `requests`:
 requests = []
 ```
 
-Every request contains a unique identifier, which will be used further in this tutorial to keep track of the request’s status. Once the request completes processing, we can then obtain the results. In other words: DocAI performs requests asynchronously. When you create a request, DocAI will automatically perform OCR (if needed) behind the scenes without requiring the user to explicitly call the OCR service.
+Every request contains a unique identifier, which will be used further in this tutorial to keep track of the request’s status. Once the request completes processing, we can then obtain the results. In other words: Zuva performs requests asynchronously. When you create a request, Zuva will automatically perform OCR (if needed) behind the scenes without requiring the user to explicitly call the OCR service.
 
 ### Language Classification
 
@@ -141,7 +139,7 @@ This service will tell you the dominant language of the document. The following 
 
 ```python
 
-languages, _ = sdk.language.create(file_ids = [d.id for d in docai_files])
+languages, _ = sdk.language.create(file_ids = [d.id for d in zuva_files])
 ```
 
 ### Document Classification
@@ -151,7 +149,7 @@ This service will tell you the document’s type (e.g. Real Estate Agreement). I
 
 ```python
 
-classifications, _ = sdk.classification.create(file_ids = [d.id for d in docai_files])
+classifications, _ = sdk.classification.create(file_ids = [d.id for d in zuva_files])
 ```
 
 ### Field Extraction
@@ -181,10 +179,10 @@ Now that you have both a list of documents and a list of field identifiers, you 
 
 ```python
 
-extractions, _ = sdk.extraction.create(file_ids = [d.id for d in docai_files], field_ids = field_ids)
+extractions, _ = sdk.extraction.create(file_ids = [d.id for d in zuva_files], field_ids = field_ids)
 ```
 
-One field extraction request is created per document in `docai_files`. Each request will be responsible to search the document for the fields from `field_ids`.
+One field extraction request is created per document in `zuva_files`. Each request will be responsible to search the document for the fields from `field_ids`.
 
 #### Combine the requests in one list
 
@@ -199,7 +197,7 @@ requests.extend(classifications + languages + extractions)
 
 #### Wait until all requests complete
 
-When a request is created, DocAI’s workers will pick them up and process them. Since this tutorial will obtain the DocAI output and save them to a spreadsheet, we will need to form a data structure that allows us to organize DocAI’s results in a manner that makes it easy for us to retrieve them when it’s time to save them.
+When a request is created, Zuva’s workers will pick them up and process them. Since this tutorial will obtain the Zuva output and save them to a spreadsheet, we will need to form a data structure that allows us to organize Zuva’s results in a manner that makes it easy for us to retrieve them when it’s time to save them.
 
 Thus, the following snippet performs two key things:
 
@@ -223,7 +221,7 @@ while len(requests) > 0:
             # Creates the data structure for the file_id if it doesn't already exist
             if request.file_id not in results:
                 results[request.file_id] = {}
-                results[request.file_id]['name'] = [d.name for d in docai_files
+                results[request.file_id]['name'] = [d.name for d in zuva_files
                                                     if d.id == request.file_id][0]
 
             if request.is_type(DocumentClassificationRequest):
@@ -260,7 +258,7 @@ There is a separate function to obtain the Field Extraction results because the 
 
 #### Data Structure
 
-This data structure was defined for this tutorial, and has no bearing on how DocAI performs its tasks. The structure exists to collate DocAI results to their respective `file_id`. This data in practice will likely be saved in a database, from where the results can be obtained. However, for this tutorial, we are setting this in-memory.
+This data structure was defined for this tutorial, and has no bearing on how Zuva performs its tasks. The structure exists to collate Zuva results to their respective `file_id`. This data in practice will likely be saved in a database, from where the results can be obtained. However, for this tutorial, we are setting this in-memory.
 
 ```json
 {

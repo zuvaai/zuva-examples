@@ -3,9 +3,9 @@
 
 # ## Introduction
 # 
-# The layouts are how DocAI “sees” the document. It contains metadata about every character and page from the document.
+# The layouts are how Zuva “sees” the document. It contains metadata about every character and page from the document.
 # 
-# This tutorial will cover how to request the layouts for a local PDF document, as well as parse the content in that file to see how DocAI “saw” the document.
+# This tutorial will cover how to request the layouts for a local PDF document, as well as parse the content in that file to see how Zuva “saw” the document.
 # 
 # After you have gone through this tutorial, you will be left with a working Python script that leverages multiple packages to take a layouts document. This script can be used to ingest layouts content and output the relevant data.
 # 
@@ -13,8 +13,8 @@
 # 
 # The following is what you will learn by going through this tutorial:
 # 
-# - How to create an instance of the Python SDK to interact with DocAI
-# - How to submit a document to DocAI
+# - How to create an instance of the Python SDK to interact with Zuva
+# - How to submit a document to Zuva
 # - How to create an OCR request
 # - How to load and iterate through the contents of a layouts file in Python
 # 
@@ -24,16 +24,16 @@
 # 
 # - The Python interpreter (this tutorial uses v3.10)
 # - A Zuva account and token - see the [Getting started guide](https://zuva.ai/documentation/quickstart/)
-# - A copy of Zuva’s [DocAI Python SDK](https://github.com/zuvaai/zdai-python)
+# - A copy of Zuva’s [Python SDK](https://github.com/zuvaai/zdai-python)
 # - A copy of [recognition_results_pb2.py](https://github.com/zuvaai/hocr-to-eocr-converter/blob/main/recognition_results_pb2.py)
 # - The `google.protobuf` Python package (this tutorial uses v3.0.0), usually installed with `pip install protobuf` or `pip3 install protobuf`
 # 
 # ## OCR
-# For DocAI to perform classification and extractions on the documents submitted to it, it must first be able to “see” what content exists in the document. Whether it be a digital-native PDF (e.g. Word Document saved as a PDF) or a potential third-party paper in PDF format that contains a scan of a physical document, DocAI needs a method to “read” the content so that downstream processing can be performed.
+# For Zuva to perform classification and extractions on the documents submitted to it, it must first be able to “see” what content exists in the document. Whether it be a digital-native PDF (e.g. Word Document saved as a PDF) or a potential third-party paper in PDF format that contains a scan of a physical document, Zuva needs a method to “read” the content so that downstream processing can be performed.
 # 
-# Optical Character Recognition enables DocAI to achieve this. By going through every character, on every page, DocAI creates a new representation of the user-provided document. This new representation allows DocAI to have a better “understanding” of the contents provided by the user, and thus is used in DocAI’s downstream processing for all of its machine learning processes.
+# Optical Character Recognition enables Zuva to achieve this. By going through every character, on every page, Zuva creates a new representation of the user-provided document. This new representation allows Zuva to have a better “understanding” of the contents provided by the user, and thus is used in Zuva’s downstream processing for all of its machine learning processes.
 # 
-# OCR is an optional service. However, if you would like to skip DocAI’s OCR, you will need to create your own representation using the output of your OCR engine, or provide raw text. The latter results in a partial degradation of machine learning performance due to it not containing the physical locations of where the characters exist on the page.
+# OCR is an optional service. However, if you would like to skip Zuva’s OCR, you will need to create your own representation using the output of your OCR engine, or provide raw text. The latter results in a partial degradation of machine learning performance due to it not containing the physical locations of where the characters exist on the page.
 # 
 # ## Layouts: The Overview
 # 
@@ -54,7 +54,7 @@
 #   - Each `Page` has a vertical dots-per-inch (DPI)
 #   - Each `Page` has a `CharacterRange` (e.g. “characters 500 to 1000 exist on this page”)
 # 
-# Folks who develop applications that contain a document viewer to visualize where extractions occurred in their contracts would leverage the layouts information to map what DocAI extracted to the document/pages that the end-user (e.g. a reviewer) is shown in their solution’s document viewer.
+# Folks who develop applications that contain a document viewer to visualize where extractions occurred in their contracts would leverage the layouts information to map what Zuva extracted to the document/pages that the end-user (e.g. a reviewer) is shown in their solution’s document viewer.
 # 
 # 
 # ## Let’s Build!
@@ -63,8 +63,8 @@
 # 
 # The first step is to import the necessary Python packages in your script. Below are the packages needed by this tutorial:
 
-# 'zdai' is the Zuva DocAI Python SDK, which provides functions
-# which make it easier to use DocAI via Python.
+# 'zdai' is the Zuva Python SDK, which provides functions
+# which make it easier to use Zuva via Python.
 from zdai import ZDAISDK
 
 # 'os' to obtain the basename of the file path provided in
@@ -72,7 +72,7 @@ from zdai import ZDAISDK
 import os
 
 # 'time' is used to wait a couple seconds between our checks
-# to DocAI to see if the request has completed
+# to Zuva to see if the request has completed
 import time
 
 # 'recognition_results_pb2' is the output of Google's
@@ -93,16 +93,16 @@ import recognition_results_pb2 as rr_pb2
 # At this point in the tutorial you have imported the necessary Python packages. You should also have a token that was created, as mentioned in the [requirements](#requirements).
 
 sdk = ZDAISDK(url   = 'https://us.app.zuva.ai/api/v2',
-              token = os.getenv('DOCAI_TOKEN'))
+              token = os.getenv('ZUVA_TOKEN'))
 
 
-# DocAI offers multiple regions to choose from, which can help you decrease latency (due to being physically closer/in the region), and data residency requirements. If you created a token on another region, provide that region’s url (e.g. `japan.app.zuva.ai`, `eu.app.zuva.ai`) instead of the one provided above (`us.app.zuva.ai`).
+# Zuva's API servers are hosted in both the US and Europe regions, which can help you decrease latency (due to being physically closer/in the region), and data residency requirements. If you created a token on another region, provide that region’s url (e.g. `eu.app.zuva.ai`) instead of the one provided above (`us.app.zuva.ai`).
 # 
-# Going forward, the `sdk` variable is going to be used to interact with DocAI.
+# Going forward, the `sdk` variable is going to be used to interact with Zuva.
 # 
 # ### Submit document
 # 
-# Before we can obtain the layouts from DocAI, we will need to submit a document and run an OCR request. To upload a file, such as the demo document
+# Before we can obtain the layouts from Zuva, we will need to submit a document and run an OCR request. To upload a file, such as the demo document
 # available [here](https://github.com/zuvaai/hocr-to-eocr-converter/blob/main/CANADAGOOS-F1Securiti-2152017.PDF), using the following code:
 
 local_file = 'upload_files/CANADAGOOS-F1Securiti-2152017.PDF'
@@ -112,7 +112,7 @@ with open(local_file, 'rb') as f:
    file.name = os.path.basename(local_file)
 
 
-# The file variable will be used going forward to refer to the unique identifier, since DocAI has no concept of filenames. It is possible to obtain the file’s unique identifier by running `print(file.id)`.
+# The file variable will be used going forward to refer to the unique identifier, since Zuva has no concept of filenames. It is possible to obtain the file’s unique identifier by running `print(file.id)`.
 # 
 # ### Create an OCR request
 # 
@@ -126,7 +126,7 @@ ocr_request = ocrs[0]
 # 
 # ### Wait for OCR request to complete
 # 
-# We will need to wait for the DocAI OCR request to complete processing before we can obtain the `layouts` content. The following snippet, every two seconds, will check the request’s latest status. If it completes successfully, then load the layouts variable. This is possible by using the `sdk` function `ocr.get_layouts`, which accepts the unique ID of the request.
+# We will need to wait for the Zuva OCR request to complete processing before we can obtain the `layouts` content. The following snippet, every two seconds, will check the request’s latest status. If it completes successfully, then load the layouts variable. This is possible by using the `sdk` function `ocr.get_layouts`, which accepts the unique ID of the request.
 
 while not ocr_request.is_finished():
     ocr_request.update()
@@ -146,7 +146,7 @@ while not ocr_request.is_finished():
 # 
 # Using the package that we imported earlier, we can leverage `recognition_results_pb2.py` to load the `layouts` content in a way that allows us to interact with it.
 # 
-# Using the `Document` (entry-point), we can create a new `Document` object, and load it using the `layouts` that [DocAI provided](#wait-for-ocr-request-to-complete) to our script.
+# Using the `Document` (entry-point), we can create a new `Document` object, and load it using the `layouts` that [Zuva provided](#wait-for-ocr-request-to-complete) to our script.
 
 doc = rr_pb2.Document()
 doc.ParseFromString(layouts)
@@ -231,7 +231,7 @@ for i, page in enumerate(doc.pages, 1):
 # 
 # The following continues with this approach, however it also exposes additional metadata for each character. It also uses the pages data to locate on which page the characters were found.
 
-# Go through each character and see where DocAI found each character
+# Go through each character and see where Zuva found each character
 # in the document
 def get_page_number(char_loc: int):
     for i, page in enumerate(doc.pages, 1):

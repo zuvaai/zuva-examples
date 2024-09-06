@@ -1,3 +1,3 @@
-# DocAI Examples
+# Zuva API Examples
 
-This repository contains a collection of example code for Zuva DocAI.
+This repository contains a collection of example code for Zuva.
