@@ -1,6 +1,6 @@
 # Spreadsheet tutorial
 
-This tutorial provides a guide to using DocAI to train a new custom field.
+This tutorial provides a guide to using Zuva API to train a new custom field.
 
 The tutorial is available as an [Jupyter notebook](https://jupyter.org/install), plain Python and plain markdown. The same
 content is also available on the [Zuva documentation website](https://zuva.ai/documentation/tutorials/training/).

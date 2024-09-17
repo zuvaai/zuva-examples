@@ -1,6 +1,6 @@
 # Layouts tutorial
 
-This tutorial provides a guide to working with DocAI's OCR layouts.
+This tutorial provides a guide to working with Zuva's OCR layouts.
 
 The tutorial is available as an [Jupyter notebook](https://jupyter.org/install), plain Python and plain markdown. The same
 content is also available on the [Zuva documentation website](https://zuva.ai/documentation/tutorials/using-layouts/).

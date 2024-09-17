@@ -3,13 +3,13 @@
 
 # ## Introduction
 # 
-# Zuva DocAI provides over 1300 built-in fields designed to cover many different use cases. However, if you need to develop your own fields, you have two options:
+# Zuva provides over 1300 built-in fields designed to cover many different use cases. However, if you need to develop your own fields, you have two options:
 # 
-# - [AI Trainer](https://zuva.ai/ai-trainer/): Provides a no-code solution to training new fields for use in DocAI. Simply upload your documents, highlight your annotations, and click train. 
+# - [AI Trainer](https://zuva.ai/ai-trainer/): Provides a no-code solution to training new fields for use in Zuva API or Analyze. Simply upload your documents, highlight your annotations, and click train. 
 # 
-# - DocAI training API: Provides low level access to Zuva's field-training functionality, suitable for integration into a custom document viewer or automated workflows. 
+# - Zuva training API: Provides low level access to Zuva's field-training functionality, suitable for integration into a custom document viewer or automated workflows. 
 # 
-# This tutorial will walk you through the process of training a new field using the API via the DocAI Python SDK.
+# This tutorial will walk you through the process of training a new field using the API via the Zuva Python SDK.
 # 
 # ### What will you learn
 # 
@@ -27,7 +27,7 @@
 # 
 # - The Python interpreter (this tutorial uses v3.10)
 # - A Zuva account and token - see the [Getting started guide](https://zuva.ai/documentation/quickstart/)
-# - A copy of Zuva’s [DocAI Python SDK](https://github.com/zuvaai/zdai-python)
+# - A copy of Zuva’s [Python SDK](https://github.com/zuvaai/zdai-python)
 
 # 
 # ## Let’s Build!
@@ -36,8 +36,8 @@
 # 
 # The first step is to import the necessary Python packages in your script. Below are the packages needed by this tutorial:
 
-# 'zdai' is the Zuva DocAI Python SDK, which provides functions
-# which make it easier to use DocAI via Python.
+# 'zdai' is the Zuva Python SDK, which provides functions
+# which make it easier to use Zuva via Python.
 from zdai import ZDAISDK
 
 # 'os' to obtain the basename of the file path provided in
@@ -45,7 +45,7 @@ from zdai import ZDAISDK
 import os
 
 # 'time' is used to wait a couple seconds between our checks
-# to DocAI to see if the request has completed
+# to Zuva to see if the request has completed
 import time
 
 # 'json' is used to encode the training API request body
@@ -63,18 +63,18 @@ import fuzzysearch
 # 
 # At this point in the tutorial you have imported the necessary Python packages. You should also have a token, as mentioned in the [requirements](#requirements).
 # 
-# Create an `sdk` instance in the region you will be using. For example, for the United States region and with your token exported as an environment variable called `DOCAI_TOKEN`:
+# Create an `sdk` instance in the region you will be using. For example, for the United States region and with your token exported as an environment variable called `ZUVA_TOKEN`:
 
 sdk = ZDAISDK(url   = 'https://us.app.zuva.ai/api/v2',
-              token = os.getenv('DOCAI_TOKEN'))
+              token = os.getenv('ZUVA_TOKEN'))
 
 
-# Going forward, the `sdk` variable is going to be used to interact with DocAI.
+# Going forward, the `sdk` variable is going to be used to interact with Zuva.
 
 # 
 # ### Gather Training Documents
 # 
-# To train a field, you will first need to upload your training documents to DocAI. These documents should be representative of the types of documents you'd like to use your field to analyze in the future. For example, if you'd like to train your field to extract a particular clause from English-language employment contracts in Ontario, you should include only English employment contracts from Ontario in the training set. If you would like the field to work across multiple jurisdictions or document types, you should try to gather a wider variety of examples.
+# To train a field, you will first need to upload your training documents to Zuva. These documents should be representative of the types of documents you'd like to use your field to analyze in the future. For example, if you'd like to train your field to extract a particular clause from English-language employment contracts in Ontario, you should include only English employment contracts from Ontario in the training set. If you would like the field to work across multiple jurisdictions or document types, you should try to gather a wider variety of examples.
 # 
 # For this tutorial, we'll use a CSV file (`training_examples.csv`) to specify which files to upload for training and the annotations to be used as training examples. The files themselves are expected to be located in the local `upload_files` subdirectory.
 
@@ -87,9 +87,9 @@ with open ('training_examples.csv') as csvfile:
 
 
 # 
-# ### Submit your documents to DocAI
+# ### Submit your documents to Zuva
 # 
-# Submitting documents to DocAI is the first step towards training a field. Note that only you will be able to train fields using your documents; Zuva will never use your documents to train any other fields. These submitted documents are treated as confidential and are not used by Zuva for anything.
+# Submitting documents to Zuva is the first step towards training a field. Note that only you will be able to train fields using your documents; Zuva will never use your documents to train any other fields. These submitted documents are treated as confidential and are not used by Zuva for anything.
 # 
 # For this tutorial, we will upload all of the files specified in the training set:
 
@@ -100,15 +100,15 @@ for example in training_examples:
     with open(os.path.join(upload_files_directory, filename), 'rb') as file:
         f, _ = sdk.file.create(content=file.read())
         example['file_id'] = f.id
-        print(f'Submitted "{filename}" to DocAI. '
+        print(f'Submitted "{filename}" to Zuva. '
               f'File ID: "{f.id}"')
 
 
-# The above will go through the list of training files and upload each to DocAI, storing the file IDs for later reference. It is important to keep track of the file ID corresponding to each file, since DocAI only has the file content, not the file names.
+# The above will go through the list of training files and upload each to Zuva, storing the file IDs for later reference. It is important to keep track of the file ID corresponding to each file, since Zuva only has the file content, not the file names.
 
 # ### OCR your documents
 # 
-# Prior to training your fields, you must process them using the [DocAI OCR service](https://zuva.ai/documentation/services/using-ocr/).
+# Prior to training your fields, you must process them using the [Zuva OCR service](https://zuva.ai/documentation/services/using-ocr/).
 # 
 # Start by creating an OCR request for each file:
 
@@ -139,7 +139,7 @@ while len(ocr_waiting) > 0:
 
 # ### Provide annotation locations
 # 
-# To train a model, DocAI needs to know the location of the target text to be extracted from each document. 
+# To train a model, Zuva needs to know the location of the target text to be extracted from each document. 
 # 
 # These locations must be given in terms of Zuva's internal representation of the document, which can be obtained from the OCR text, layouts or eOCR.
 # 
@@ -155,7 +155,7 @@ annotations_dict = {}
 
 for example in training_examples:
     file_id = example['file_id']
-    
+
     if example['annotation'] == "":
         print(example['file_name'], "no annotation")
         annotations_dict[file_id] = []
@@ -165,7 +165,7 @@ for example in training_examples:
     matches = fuzzysearch.find_near_matches(example['annotation'], text, max_l_dist=L_DIST)
     start = matches[0].start
     end = matches[0].end
-        
+
     print(example['file_name'], start, end)
 
 
@@ -204,7 +204,7 @@ for file_id, locations in annotations_dict.items():
 # 
 # Note that there are two files with no annotations. In one case (`12. ISCON_EX104MaterialContracts_20000501.pdf`), we've deliberately included a file with no "Further Assurances" clauses, which the ML will use as a negative example. The other case (`15. SPARGROUPI_EX10MaterialContracts_20030331.pdf`) is also deliberate included as a demonstration of what it looks like when the AI finds a "false positive" during training. There is also one file (`13. EXELISINCO_EX10MaterialContracts_20110914.pdf`) where we've erroneously provided a "Survival" clause instead, as an example of a false negative.
 # 
-# The `annotations` object now contains all of the information DocAI will need in order to train a field.
+# The `annotations` object now contains all of the information Zuva will need in order to train a field.
 
 # ### Create and train the field
 # 
@@ -376,4 +376,4 @@ for result in results:
 # 
 #     (i) Further Assurances. The parties agree to execute such additional documents and perform such acts as are reasonably necessary to effectuate the intent of this Agreement.
 # 
-# Congratulations on training your field! It is now ready to use on real documents as part of your DocAI workflows.
+# Congratulations on training your field! It is now ready to use on real documents as part of your Zuva workflows.
